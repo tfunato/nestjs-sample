@@ -1,7 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AlbumsService } from './albums.service';
-import { CreateAlbumDto } from './dto/create-album.dto';
-import { UpdateAlbumDto } from './dto/update-album.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common'
+import { AlbumsService } from './albums.service'
+import { CreateAlbumDto } from './dto/create-album.dto'
+import { UpdateAlbumDto } from './dto/update-album.dto'
 
 @Controller('albums')
 export class AlbumsController {
@@ -9,26 +17,26 @@ export class AlbumsController {
 
   @Post()
   create(@Body() createAlbumDto: CreateAlbumDto) {
-    return this.albumsService.create(createAlbumDto);
+    return this.albumsService.create(createAlbumDto)
   }
 
   @Get()
   findAll() {
-    return this.albumsService.findAll();
+    return this.albumsService.findAll()
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.albumsService.findOne(+id);
+    return this.albumsService.findOne(+id)
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateAlbumDto: UpdateAlbumDto) {
-    return this.albumsService.update(+id, updateAlbumDto);
+    return this.albumsService.update(+id, updateAlbumDto)
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.albumsService.remove(+id);
+    return this.albumsService.remove(+id)
   }
 }

@@ -1,7 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { SingersService } from './singers.service';
-import { CreateSingerDto } from './dto/create-singer.dto';
-import { UpdateSingerDto } from './dto/update-singer.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common'
+import { SingersService } from './singers.service'
+import { CreateSingerDto } from './dto/create-singer.dto'
+import { UpdateSingerDto } from './dto/update-singer.dto'
 
 @Controller('singers')
 export class SingersController {
@@ -9,26 +17,26 @@ export class SingersController {
 
   @Post()
   create(@Body() createSingerDto: CreateSingerDto) {
-    return this.singersService.create(createSingerDto);
+    return this.singersService.create(createSingerDto)
   }
 
   @Get()
   findAll() {
-    return this.singersService.findAll();
+    return this.singersService.findAll()
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.singersService.findOne(+id);
+    return this.singersService.findOne(+id)
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateSingerDto: UpdateSingerDto) {
-    return this.singersService.update(+id, updateSingerDto);
+    return this.singersService.update(+id, updateSingerDto)
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.singersService.remove(+id);
+    return this.singersService.remove(+id)
   }
 }
