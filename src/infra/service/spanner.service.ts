@@ -10,8 +10,7 @@ export class SpannerService {
       projectId: projectId,
     })
     const instance = spanner.instance(instanceId)
-    const database = instance.database(databaseId)
-    this.db = database
+    this.db = instance.database(databaseId)
   }
 
   getSpanner(): Database {
