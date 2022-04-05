@@ -3,5 +3,6 @@ import { SpannerService } from './spanner.service'
 
 @Module({
   providers: [SpannerService],
+  exports: [SpannerService],
 })
 export class ServiceModule {}

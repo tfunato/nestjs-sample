@@ -1,5 +1,20 @@
 version: '3'
 services:
+    app:
+      build:
+        context: ./
+        dockerfile: ./Dockerfile
+      ports:
+        - 3000:3000
+      volumes:
+        - ./:/app
+      command: yarn run start:dev
+      environment:
+        SPANNER_PROJECT_ID: "test-project"
+        SPANNER_INSTANCE_ID: "test-instance"
+        SPANNER_DATABASE_ID: "test-database"
+        SPANNER_EMULATOR_URL: "http://spanner:9020/"
+        SPANNER_EMULATOR_HOST: "spanner:9010"
     # Spanner
     spanner:
      image: gcr.io/cloud-spanner-emulator/emulator:1.2.0
@@ -35,8 +50,6 @@ services:
         SPANNER_EMULATOR_URL: "http://spanner:9020/"
       volumes:
         - ./migrations/ddl:/ddl
-      restart: on-failure
-
     # DB Migration (Insert data)
     wrench-apply:
       image: mercari/wrench:1.0.3
@@ -49,8 +62,6 @@ services:
         SPANNER_EMULATOR_URL: "http://spanner:9020/"
       volumes:
         - ./migrations/dml:/dml
-      restart: on-failure
-
     # CLI
     spanner-cli:
       image: sjdaws/spanner-cli:v1.0.0
