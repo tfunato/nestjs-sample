@@ -1,8 +1,18 @@
+import { SpannerService } from '../service/spanner.service'
 
-export declare class Repository<Entity> {
+export class Repository<Entity> {
+  constructor(private readonly spanner: SpannerService) {}
 
-  insert(entity : Entity): Entity
-  findAll(): Entity[]
-  findOne(id: string): Entity
-  delete(id: string): Entity
+  insert(entity: Entity): Entity {
+    return null
+  }
+  findAll(): Entity[] {
+    return null
+  }
+  findOne(id: string): Entity {
+    return null
+  }
+  delete(id: string): Entity {
+    return null
+  }
 }

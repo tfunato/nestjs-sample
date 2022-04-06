@@ -17,7 +17,7 @@ export class AlbumsService {
 
   async findAll(): Promise<Album[]> {
     const sql = 'SELECT * FROM Albums'
-    const [rows]  = await this.spanner.getDb().run(sql)
+    const [rows] = await this.spanner.getDb().run(sql)
     const albums: Album[] = rows.map<Album>((row) => {
       const rowJson: Json = row.toJSON()
       const album = new Album()
@@ -25,7 +25,6 @@ export class AlbumsService {
       album.singerId = rowJson.SingerId
       album.albumTitle = rowJson.AlbumTitle
       return album
-
     })
     return albums
   }
