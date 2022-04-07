@@ -1,9 +1,9 @@
-import { MetadataArgsStorage } from './meta-data/MetadataArgsStorage'
+import { MetaDataArgsStorage } from './meta-data/meta-data-args-storage'
 
 /**
  * Gets metadata args storage.
  */
-export function getMetadataArgsStorage(): MetadataArgsStorage {
+export function getMetadataArgsStorage(): MetaDataArgsStorage {
   // we should store metadata storage in a global variable otherwise it brings too much problems
   // one of the problem is that if any entity (or any other) will be imported before consumer will call
   // useContainer method with his own container implementation, that entity will be registered in the
@@ -14,7 +14,7 @@ export function getMetadataArgsStorage(): MetadataArgsStorage {
   // this leads to impossibility of usage of entities in migrations and cli related operations
   const globalScope = global
   if (!globalScope.ormMetadataArgsStorage)
-    globalScope.ormMetadataArgsStorage = new MetadataArgsStorage()
+    globalScope.ormMetadataArgsStorage = new MetaDataArgsStorage()
 
   return globalScope.ormMetadataArgsStorage
 }

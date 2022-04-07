@@ -1,5 +1,5 @@
-
-export interface ColumnMetadataArgs {
+/* eslint-disable */
+export interface ColumnMetaDataArgs {
   /**
    * Class to which column is applied.
    */

@@ -1,19 +1,20 @@
-import { ColumnMetadataArgs } from './ColumnMetadataArgs'
-import { TableMetadataArgs } from './TableMetadataArgs'
+import { ColumnMetaDataArgs } from './column-meta-data-args'
+import { TableMetaDataArgs } from './table-meta-data-args'
 
-export class MetadataArgsStorage {
-  readonly tables: TableMetadataArgs[] = []
-  readonly columns: ColumnMetadataArgs[] = []
+/* eslint-disable */
+export class MetaDataArgsStorage {
+  readonly tables: TableMetaDataArgs[] = []
+  readonly columns: ColumnMetaDataArgs[] = []
 
   filterTables(
     target: (Function | string) | (Function | string)[],
-  ): TableMetadataArgs[] {
+  ): TableMetaDataArgs[] {
     return this.filterByTarget(this.tables, target)
   }
 
   filterColumns(
     target: (Function | string) | (Function | string)[],
-  ): ColumnMetadataArgs[] {
+  ): ColumnMetaDataArgs[] {
     return this.filterByTargetAndWithoutDuplicateProperties(
       this.columns,
       target,
@@ -39,7 +40,7 @@ export class MetadataArgsStorage {
    */
   protected filterByTargetAndWithoutDuplicateProperties<
     T extends { target: Function | string; propertyName: string },
-    >(array: T[], target: (Function | string) | (Function | string)[]): T[] {
+  >(array: T[], target: (Function | string) | (Function | string)[]): T[] {
     const newArray: T[] = []
     array.forEach((item) => {
       const sameTarget = Array.isArray(target)

@@ -1,5 +1,5 @@
-
-export interface TableMetadataArgs {
+/* eslint-disable */
+export interface TableMetaDataArgs {
   /**
    * Class to which table is applied.
    * Function target is a table defined in the class.

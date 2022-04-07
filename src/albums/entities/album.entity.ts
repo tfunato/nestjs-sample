@@ -1,7 +1,7 @@
 import { Entity } from '../../infra/repository/decorator/entity'
 import { Column } from '../../infra/repository/decorator/column'
 
-@Entity('aaa')
+@Entity('Albums')
 export class Album {
   @Column()
   singerId: string
