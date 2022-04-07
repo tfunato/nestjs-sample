@@ -6,16 +6,18 @@ import { Album } from './entities/album.entity'
 import { Row } from '@google-cloud/spanner/build/src/partial-result-stream'
 import { Rows } from '@google-cloud/spanner/build/src/transaction'
 import { Json } from '@google-cloud/spanner/build/src/codec'
+import { AlbumRepository } from './album.repository'
 
 @Injectable()
 export class AlbumsService {
-  constructor(private readonly spanner: SpannerService) {}
+  constructor(private readonly albumRepository: AlbumRepository) {}
 
   create(createAlbumDto: CreateAlbumDto) {
     return 'This action adds a new album'
   }
 
   async findAll(): Promise<Album[]> {
+    /*
     const sql = 'SELECT * FROM Albums'
     const [rows] = await this.spanner.getDb().run(sql)
     const albums: Album[] = rows.map<Album>((row) => {
@@ -27,6 +29,9 @@ export class AlbumsService {
       return album
     })
     return albums
+     */
+    this.albumRepository.insert(new Album())
+    return null
   }
 
   findOne(id: number) {
