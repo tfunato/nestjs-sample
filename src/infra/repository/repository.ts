@@ -7,16 +7,16 @@ import { ColumnMetaDataArgs } from './meta-data/column-meta-data-args'
 import { FindOneOptions } from './find-option/find-one-option'
 
 type Meta = {
-  metaTable: TableMetaDataArgs,
+  metaTable: TableMetaDataArgs
   metaColumns: ColumnMetaDataArgs[]
 }
 
 export class Repository<T> {
   readonly spanner: SpannerService
-  private readonly logger = new Logger(Repository.name);
+  private readonly logger = new Logger(Repository.name)
   private readonly target
 
-  constructor(spanner: SpannerService, ctor: { new(): T}) {
+  constructor(spanner: SpannerService, ctor: { new (): T }) {
     this.spanner = spanner
     this.target = new ctor()
   }
@@ -36,25 +36,23 @@ export class Repository<T> {
     const database = this.spanner.getDb()
     database.runTransaction(async (err, transaction) => {
       if (err) {
-        console.error(err);
-        return;
+        console.error(err)
+        return
       }
       const param = {}
-      columnNames.forEach((columnName)=> {
+      columnNames.forEach((columnName) => {
         param[columnName] = entity[columnName]
       })
       try {
         const [rowCount] = await transaction.runUpdate({
           sql: query,
           params: param,
-        });
-        this.logger.log( query)
+        })
+        this.logger.log(query)
         this.logger.log('insert row count:' + rowCount)
-        await transaction.commit();
+        await transaction.commit()
       } catch (err) {
         throw err
-      } finally {
-        // no op
       }
     })
     return entity
@@ -65,18 +63,22 @@ export class Repository<T> {
 
     this.logger.log(query)
 
-    const [rows] = await this.spanner.getDb().run(query)
-    return rows.map<T>((row: Row) => {
-      return this.mapEntity(row, columnNames)
-    })
+    try {
+      const [rows] = await this.spanner.getDb().run(query)
+      return rows.map<T>((row: Row) => {
+        return this.mapEntity(row, columnNames)
+      })
+    } catch (err) {
+      throw err
+    }
   }
 
-  async findOne(options: FindOneOptions<T>): Promise<T | null>  {
+  async findOne(options: FindOneOptions<T>): Promise<T | null> {
     const columnNames = this.getColumnNames()
     const params = {}
     let sql = this.baseSelectQuery(columnNames, this.getMetaData())
     sql = sql.concat(' WHERE ')
-    const wheres: string[] = Object.keys(options.where).map((key:string) => {
+    const wheres: string[] = Object.keys(options.where).map((key: string) => {
       params[key] = options.where[key]
       return key + '=@' + key + ' '
     })
@@ -89,7 +91,7 @@ export class Repository<T> {
       const [rows] = await this.spanner.getDb().run({
         json: false,
         sql: sql,
-        params: params
+        params: params,
       })
       this.logger.log(rows)
       const entities: T[] = rows.map<T>((row: Row) => {
@@ -104,23 +106,67 @@ export class Repository<T> {
       throw err
     }
   }
-  delete(id: string): T {
-    return null
-  }
+  async deleteByPK(options: FindOneOptions<T>) {
+    const meta: Meta = this.getMetaData()
+    // check pk
+    const pkColumns = meta.metaColumns
+      .filter((metaColumn) => {
+        return metaColumn.primary == true
+      })
+      .map((column) => {
+        return column.propertyName
+      })
+    if (pkColumns.length == 0) {
+      throw new Error('pk column not found')
+    }
+    pkColumns.forEach((pkColumn) => {
+      if (!(pkColumn in options.where)) {
+        throw new Error('pk column must set')
+      }
+    })
+    let sql = 'DELETE FROM '.concat(meta.metaTable.name).concat(' WHERE ')
+    const params = {}
+    const wheres: string[] = Object.keys(options.where).map((key: string) => {
+      params[key] = options.where[key]
+      return key + '=@' + key + ' '
+    })
+    sql = sql.concat(wheres.join(' AND '))
 
+    this.logger.log(sql)
+    this.logger.log(params)
+
+    const db = this.spanner.getDb()
+    db.runTransaction(async (err, transaction) => {
+      if (err) {
+        console.error(err)
+        return
+      }
+      try {
+        const [rowCount] = await transaction.runUpdate({
+          sql: sql,
+          params: params,
+        })
+        this.logger.log(sql)
+        this.logger.log('delete row count:' + rowCount)
+        await transaction.commit()
+      } catch (err) {
+        throw err
+      }
+    })
+  }
 
   protected getMetaData(): Meta {
     const metaTable = getMetadataArgsStorage().filterTables(
-      this.target.constructor
+      this.target.constructor,
     )[0]
     const metaColumns = getMetadataArgsStorage().filterColumns(
-      this.target.constructor
+      this.target.constructor,
     )
-    return {metaTable, metaColumns}
+    return { metaTable, metaColumns }
   }
 
   protected mapEntity(row: Row, columnNames: string[]): T {
-    const entity = new this.target.constructor
+    const entity = new this.target.constructor()
     columnNames.forEach((columnName) => {
       const rowJson = row.toJSON()
       entity[columnName] = rowJson[columnName]
@@ -133,7 +179,6 @@ export class Repository<T> {
     return meta.metaColumns.map((column) => {
       return column.propertyName
     })
-
   }
 
   protected baseSelectQuery(columnNames: string[], meta: Meta): string {
@@ -141,6 +186,5 @@ export class Repository<T> {
     query = query.concat(columnNames.join(', '))
     query = query.concat(' FROM ').concat(meta.metaTable.name)
     return query
-
   }
 }

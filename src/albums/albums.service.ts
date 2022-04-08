@@ -3,7 +3,7 @@ import { CreateAlbumDto } from './dto/create-album.dto'
 import { UpdateAlbumDto } from './dto/update-album.dto'
 import { Album } from './entities/album.entity'
 import { AlbumRepository } from './album.repository'
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid'
 
 @Injectable()
 export class AlbumsService {
@@ -22,9 +22,9 @@ export class AlbumsService {
     return await this.albumRepository.findAll()
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Album> {
     return await this.albumRepository.findOne({
-      where: {singerId: '12', albumId:'1'}
+      where: { singerId: '12', albumId: '1' },
     })
   }
 
@@ -32,7 +32,13 @@ export class AlbumsService {
     return `This action updates a #${id} album`
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} album`
+  async remove() {
+    await this.albumRepository.deleteByPK({
+      where: {
+        singerId: '12',
+        albumId: '1',
+      },
+    })
+    return `This action removes a album`
   }
 }

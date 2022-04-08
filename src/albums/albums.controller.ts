@@ -37,6 +37,6 @@ export class AlbumsController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.albumsService.remove(+id)
+    return this.albumsService.remove()
   }
 }
