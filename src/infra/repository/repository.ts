@@ -2,6 +2,8 @@ import { SpannerService } from '../service/spanner.service'
 import { getMetadataArgsStorage } from './globals'
 import { Row } from '@google-cloud/spanner/build/src/partial-result-stream'
 import { Logger } from '@nestjs/common'
+import { TableMetaDataArgs } from './meta-data/table-meta-data-args'
+import { ColumnMetaDataArgs } from './meta-data/column-meta-data-args'
 
 export class Repository<T> {
   readonly spanner: SpannerService
@@ -14,21 +16,51 @@ export class Repository<T> {
   }
 
   async insert(entity: T): Promise<T> {
-    return null
+    const meta = this.getMetaData()
+    let query = 'INSERT '
+    query = query.concat(meta.metaTable.name)
+    query = query.concat('(')
+    const columnNames: string[] = meta.metaColumns.map((column) => {
+      return column.propertyName
+    })
+    query = query.concat(columnNames.join(', ')).concat(' ) VALUES (@')
+    query = query.concat(columnNames.join(', @'))
+    query = query.concat(')')
+
+    const database = this.spanner.getDb()
+    database.runTransaction(async (err, transaction) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      const param = {}
+      columnNames.forEach((columnName)=> {
+        param[columnName] = entity[columnName]
+      })
+      try {
+        const [rowCount] = await transaction.runUpdate({
+          sql: query,
+          params: param,
+        });
+        this.logger.log( query)
+        this.logger.log('insert row count:' + rowCount)
+        await transaction.commit();
+      } catch (err) {
+        throw err
+      } finally {
+        // no op
+      }
+    })
+    return entity
   }
   async findAll(): Promise<T[]> {
-    const metaTable = getMetadataArgsStorage().filterTables(
-      this.target.constructor
-    )[0]
-    const metaColumns = getMetadataArgsStorage().filterColumns(
-      this.target.constructor
-    )
+    const meta = this.getMetaData()
     let query = 'SELECT '
-    const columnNames: string[] = metaColumns.map((column) => {
+    const columnNames: string[] = meta.metaColumns.map((column) => {
       return column.propertyName
     })
     query = query.concat(columnNames.join(', '))
-    query = query.concat(' FROM ').concat(metaTable.name)
+    query = query.concat(' FROM ').concat(meta.metaTable.name)
 
     this.logger.log(query)
 
@@ -48,5 +80,15 @@ export class Repository<T> {
   }
   delete(id: string): T {
     return null
+  }
+
+  protected getMetaData(): {metaTable: TableMetaDataArgs, metaColumns: ColumnMetaDataArgs[]} {
+    const metaTable = getMetadataArgsStorage().filterTables(
+      this.target.constructor
+    )[0]
+    const metaColumns = getMetadataArgsStorage().filterColumns(
+      this.target.constructor
+    )
+    return {metaTable, metaColumns}
   }
 }

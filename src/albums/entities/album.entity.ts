@@ -4,10 +4,10 @@ import { Column } from '../../infra/repository/decorator/column'
 @Entity('Albums')
 export class Album {
   @Column()
-  singerId: number
+  singerId: string
 
   @Column()
-  albumId: number
+  albumId: string
 
   @Column()
   albumTitle: string
