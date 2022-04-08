@@ -155,6 +155,10 @@ export class Repository<T> {
     })
   }
 
+  async update(entity: T): Promise<T> {
+    return null
+  }
+
   protected getMetaData(): Meta {
     const metaTable = getMetadataArgsStorage().filterTables(
       this.target.constructor,
