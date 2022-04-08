@@ -9,12 +9,15 @@ import { Album } from './entities/album.entity'
 @Module({
   imports: [ServiceModule],
   controllers: [AlbumsController],
-  providers: [AlbumsService, {
-    provide: AlbumRepository,
-    useFactory: (spanner: SpannerService) => {
-      return new AlbumRepository(spanner, Album)
+  providers: [
+    AlbumsService,
+    {
+      provide: AlbumRepository,
+      useFactory: (spanner: SpannerService) => {
+        return new AlbumRepository(spanner, Album)
+      },
+      inject: [SpannerService],
     },
-    inject: [SpannerService]
-  }],
+  ],
 })
 export class AlbumsModule {}
