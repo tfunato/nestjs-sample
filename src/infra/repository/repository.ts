@@ -4,6 +4,12 @@ import { Row } from '@google-cloud/spanner/build/src/partial-result-stream'
 import { Logger } from '@nestjs/common'
 import { TableMetaDataArgs } from './meta-data/table-meta-data-args'
 import { ColumnMetaDataArgs } from './meta-data/column-meta-data-args'
+import { FindOneOptions } from './find-option/find-one-option'
+
+type Meta = {
+  metaTable: TableMetaDataArgs,
+  metaColumns: ColumnMetaDataArgs[]
+}
 
 export class Repository<T> {
   readonly spanner: SpannerService
@@ -54,35 +60,56 @@ export class Repository<T> {
     return entity
   }
   async findAll(): Promise<T[]> {
-    const meta = this.getMetaData()
-    let query = 'SELECT '
-    const columnNames: string[] = meta.metaColumns.map((column) => {
-      return column.propertyName
-    })
-    query = query.concat(columnNames.join(', '))
-    query = query.concat(' FROM ').concat(meta.metaTable.name)
+    const columnNames = this.getColumnNames()
+    const query = this.baseSelectQuery(columnNames, this.getMetaData())
 
     this.logger.log(query)
 
     const [rows] = await this.spanner.getDb().run(query)
-    const entities: T[] = rows.map<T>((row: Row) => {
-      const entity = new this.target.constructor
-      columnNames.forEach((columnName) => {
-        const rowJson = row.toJSON()
-        entity[columnName] = rowJson[columnName]
-      })
-      return entity
+    return rows.map<T>((row: Row) => {
+      return this.mapEntity(row, columnNames)
     })
-    return entities
   }
-  findOne(id: string): T {
-    return null
+
+  async findOne(options: FindOneOptions<T>): Promise<T | null>  {
+    const columnNames = this.getColumnNames()
+    const params = {}
+    let sql = this.baseSelectQuery(columnNames, this.getMetaData())
+    sql = sql.concat(' WHERE ')
+    const wheres: string[] = Object.keys(options.where).map((key:string) => {
+      params[key] = options.where[key]
+      return key + '=@' + key + ' '
+    })
+    sql = sql.concat(wheres.join(' AND '))
+    sql = sql.concat(' LIMIT 1')
+    this.logger.log(sql)
+    this.logger.log(params)
+
+    try {
+      const [rows] = await this.spanner.getDb().run({
+        json: false,
+        sql: sql,
+        params: params
+      })
+      this.logger.log(rows)
+      const entities: T[] = rows.map<T>((row: Row) => {
+        return this.mapEntity(row, columnNames)
+      })
+      if (entities.length > 0) {
+        return entities[0]
+      } else {
+        return null
+      }
+    } catch (err) {
+      throw err
+    }
   }
   delete(id: string): T {
     return null
   }
 
-  protected getMetaData(): {metaTable: TableMetaDataArgs, metaColumns: ColumnMetaDataArgs[]} {
+
+  protected getMetaData(): Meta {
     const metaTable = getMetadataArgsStorage().filterTables(
       this.target.constructor
     )[0]
@@ -90,5 +117,30 @@ export class Repository<T> {
       this.target.constructor
     )
     return {metaTable, metaColumns}
+  }
+
+  protected mapEntity(row: Row, columnNames: string[]): T {
+    const entity = new this.target.constructor
+    columnNames.forEach((columnName) => {
+      const rowJson = row.toJSON()
+      entity[columnName] = rowJson[columnName]
+    })
+    return entity
+  }
+
+  protected getColumnNames(): string[] {
+    const meta = this.getMetaData()
+    return meta.metaColumns.map((column) => {
+      return column.propertyName
+    })
+
+  }
+
+  protected baseSelectQuery(columnNames: string[], meta: Meta): string {
+    let query = 'SELECT '
+    query = query.concat(columnNames.join(', '))
+    query = query.concat(' FROM ').concat(meta.metaTable.name)
+    return query
+
   }
 }

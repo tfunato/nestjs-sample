@@ -22,8 +22,10 @@ export class AlbumsService {
     return await this.albumRepository.findAll()
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} album`
+  async findOne(id: number) {
+    return await this.albumRepository.findOne({
+      where: {singerId: '12', albumId:'1'}
+    })
   }
 
   update(id: number, updateAlbumDto: UpdateAlbumDto) {

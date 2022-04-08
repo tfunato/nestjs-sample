@@ -11,7 +11,13 @@ export interface ColumnMetaDataArgs {
   readonly propertyName: string
 
   /**
+   * Primary column flag
+   */
+  readonly primary: boolean
+
+  /**
    * Target RepositoryName
    */
   readonly repositoryName: string
+
 }
