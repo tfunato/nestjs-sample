@@ -1,50 +1,52 @@
 import { SpannerService } from '../service/spanner.service'
 import { getMetadataArgsStorage } from './globals'
 import { Row } from '@google-cloud/spanner/build/src/partial-result-stream'
+import { Logger } from '@nestjs/common'
 
-export class Repository<Entity> {
+export class Repository<T> {
   readonly spanner: SpannerService
-  readonly target: Entity
+  private readonly logger = new Logger(Repository.name);
+  private readonly target
 
-  constructor(spanner: SpannerService) {
+  constructor(spanner: SpannerService, ctor: { new(): T}) {
     this.spanner = spanner
+    this.target = new ctor()
   }
 
-  insert(entity: Entity): Entity {
+  async insert(entity: T): Promise<T> {
     return null
   }
-  async findAll(): Promise<Entity[]> {
+  async findAll(): Promise<T[]> {
     const metaTable = getMetadataArgsStorage().filterTables(
-      this.target.constructor,
+      this.target.constructor
     )[0]
     const metaColumns = getMetadataArgsStorage().filterColumns(
-      this.target.constructor,
+      this.target.constructor
     )
     let query = 'SELECT '
     const columnNames: string[] = metaColumns.map((column) => {
       return column.propertyName
     })
     query = query.concat(columnNames.join(', '))
-    query.concat(' FROM ').concat(metaTable.name)
+    query = query.concat(' FROM ').concat(metaTable.name)
+
+    this.logger.log(query)
 
     const [rows] = await this.spanner.getDb().run(query)
-    const entities: Entity[] = rows.map<Entity>((row: Row) => {
-      const entity = Object.create(metaTable.target.prototype)
+    const entities: T[] = rows.map<T>((row: Row) => {
+      const entity = new this.target.constructor
       columnNames.forEach((columnName) => {
-        const descriptor = Object.getOwnPropertyDescriptor(entity, columnName)
-        if (descriptor) {
-          const rowJson = row.toJSON()
-        }
+        const rowJson = row.toJSON()
+        entity[columnName] = rowJson[columnName]
       })
       return entity
     })
-    //    target.test = 'hoge'
+    return entities
+  }
+  findOne(id: string): T {
     return null
   }
-  findOne(id: string): Entity {
-    return null
-  }
-  delete(id: string): Entity {
+  delete(id: string): T {
     return null
   }
 }

@@ -30,8 +30,7 @@ export class AlbumsService {
     })
     return albums
      */
-    this.albumRepository.insert(new Album())
-    return null
+    return await this.albumRepository.findAll()
   }
 
   findOne(id: number) {

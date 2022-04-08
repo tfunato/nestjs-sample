@@ -9,4 +9,9 @@ export interface ColumnMetaDataArgs {
    * Class's property name to which column is applied.
    */
   readonly propertyName: string
+
+  /**
+   * Target RepositoryName
+   */
+  readonly repositoryName: string
 }

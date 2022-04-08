@@ -9,5 +9,10 @@ export interface TableMetaDataArgs {
   /**
    * Table's name. If name is not set then table's name will be generated from target's name.
    */
-  name?: string
+  name: string
+
+  /**
+   * This Table's repositoryName
+   */
+  repositoryName: string
 }

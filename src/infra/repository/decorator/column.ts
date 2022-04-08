@@ -8,6 +8,7 @@ export function Column(): PropertyDecorator {
     getMetadataArgsStorage().columns.push({
       target: object.constructor,
       propertyName: propertyName,
+      repositoryName: object.constructor.name + 'Repository'
     } as ColumnMetaDataArgs)
   }
 }
