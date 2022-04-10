@@ -31,8 +31,13 @@ export class AlbumsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAlbumDto: UpdateAlbumDto) {
-    return this.albumsService.update(+id, updateAlbumDto)
+  async update(
+    @Param('id') id: string,
+    @Body() updateAlbumDto: UpdateAlbumDto,
+  ) {
+    const ret = await this.albumsService.update(+id, updateAlbumDto)
+    console.log(ret)
+    return ret
   }
 
   @Delete(':id')

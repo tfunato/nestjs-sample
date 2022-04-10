@@ -36,8 +36,7 @@ export class Repository<T> {
     const database = this.spanner.getDb()
     database.runTransaction(async (err, transaction) => {
       if (err) {
-        console.error(err)
-        return
+        throw err
       }
       const param = {}
       columnNames.forEach((columnName) => {
@@ -85,7 +84,7 @@ export class Repository<T> {
     sql = sql.concat(wheres.join(' AND '))
     sql = sql.concat(' LIMIT 1')
     this.logger.log(sql)
-    this.logger.log(params)
+    this.logger.log(JSON.stringify(params))
 
     try {
       const [rows] = await this.spanner.getDb().run({
@@ -106,7 +105,7 @@ export class Repository<T> {
       throw err
     }
   }
-  async deleteByPK(options: FindOneOptions<T>) {
+  async deleteByPK(options: FindOneOptions<T>): Promise<number> {
     const meta: Meta = this.getMetaData()
     // check pk
     const pkColumns = meta.metaColumns
@@ -133,13 +132,13 @@ export class Repository<T> {
     sql = sql.concat(wheres.join(' AND '))
 
     this.logger.log(sql)
-    this.logger.log(params)
+    this.logger.log(JSON.stringify(params))
 
-    const db = this.spanner.getDb()
-    db.runTransaction(async (err, transaction) => {
+    let count = 0
+    const db = await this.spanner.getDb()
+    await db.runTransaction(async (err, transaction) => {
       if (err) {
-        console.error(err)
-        return
+        throw err
       }
       try {
         const [rowCount] = await transaction.runUpdate({
@@ -149,14 +148,72 @@ export class Repository<T> {
         this.logger.log(sql)
         this.logger.log('delete row count:' + rowCount)
         await transaction.commit()
+
+        count = rowCount
+        return 0
       } catch (err) {
         throw err
       }
     })
+    return count
   }
 
-  async update(entity: T): Promise<T> {
-    return null
+  async updateByPK(entity: T): Promise<number> {
+    const meta: Meta = this.getMetaData()
+    // check pk
+    const pkColumns = meta.metaColumns
+      .filter((metaColumn) => {
+        return metaColumn.primary == true
+      })
+      .map((column) => {
+        return column.propertyName
+      })
+    if (pkColumns.length == 0) {
+      throw new Error('pk column not found.set pk column in entity')
+    }
+    pkColumns.forEach((pkColumn: string) => {
+      if (!entity[pkColumn]) {
+        throw new Error('pk column value must set.')
+      }
+    })
+    let sql = 'UPDATE '.concat(meta.metaTable.name).concat(' SET ')
+    const setters: string[] = []
+    const wheres: string[] = []
+    const params = {}
+    Object.keys(entity).forEach((key: string) => {
+      if (pkColumns.includes(key)) {
+        wheres.push(key + ' = @' + key)
+        params[key] = entity[key]
+      } else {
+        if (entity[key]) {
+          setters.push(key + ' = @' + key)
+          params[key] = entity[key]
+        }
+      }
+    })
+    sql = sql.concat(setters.join(' , '))
+    sql = sql.concat(' WHERE ').concat(wheres.join(' AND '))
+    const db = await this.spanner.getDb()
+    let retCount = 0
+    await db.runTransaction(async (err, transaction) => {
+      if (err) {
+        throw err
+      }
+      try {
+        const [rowCount] = await transaction.runUpdate({
+          sql: sql,
+          params: params,
+        })
+        this.logger.log(sql)
+        this.logger.log(JSON.stringify(params))
+        this.logger.log('update row count:' + rowCount)
+        await transaction.commit()
+        retCount = rowCount
+      } catch (err) {
+        throw err
+      }
+    })
+    return retCount
   }
 
   protected getMetaData(): Meta {

@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid'
 export class AlbumsService {
   constructor(private readonly albumRepository: AlbumRepository) {}
 
-  async create(createAlbumDto: CreateAlbumDto) {
+  async create(createAlbumDto: CreateAlbumDto): Promise<Album> {
     const album = new Album()
     album.albumId = uuidv4()
     album.albumTitle = 'albumTitle'
@@ -28,17 +28,20 @@ export class AlbumsService {
     })
   }
 
-  update(id: number, updateAlbumDto: UpdateAlbumDto) {
-    return `This action updates a #${id} album`
+  async update(id: number, updateAlbumDto: UpdateAlbumDto): Promise<number> {
+    const album = new Album()
+    album.albumId = '1'
+    album.singerId = '13'
+    album.albumTitle = 'updated album title'
+    return await this.albumRepository.updateByPK(album)
   }
 
-  async remove() {
-    await this.albumRepository.deleteByPK({
+  async remove(): Promise<number> {
+    return await this.albumRepository.deleteByPK({
       where: {
         singerId: '12',
         albumId: '1',
       },
     })
-    return `This action removes a album`
   }
 }
