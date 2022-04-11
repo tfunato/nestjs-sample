@@ -19,12 +19,12 @@ module.exports = {
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
-    'semi': ['error', 'never', {'beforeStatementContinuationChars': 'never'}],
-    'semi-spacing': ['error', {'after': true, 'before': false}],
+    '@typescript-eslint/no-explicit-any': 'error',
+    semi: ['error', 'never', { beforeStatementContinuationChars: 'never' }],
+    'semi-spacing': ['error', { after: true, before: false }],
     'semi-style': ['error', 'first'],
     'no-extra-semi': 'error',
     'no-unexpected-multiline': 'error',
-    'no-unreachable': 'error'
+    'no-unreachable': 'error',
   },
-};
+}
