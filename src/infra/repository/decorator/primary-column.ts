@@ -1,5 +1,5 @@
-import { ColumnMetaDataArgs } from '../meta-data/column-meta-data-args'
 import { getMetadataArgsStorage } from '../globals'
+import { ColumnMetaDataArgs } from '../meta-data/column-meta-data-args'
 
 export function PrimaryColumn(): PropertyDecorator
 
@@ -9,7 +9,7 @@ export function PrimaryColumn(): PropertyDecorator {
       target: object.constructor,
       propertyName: propertyName,
       primary: true,
-      repositoryName: object.constructor.name + 'Repository'
+      repositoryName: object.constructor.name + 'Repository',
     } as ColumnMetaDataArgs)
   }
 }

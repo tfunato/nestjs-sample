@@ -1,6 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing'
 import { AlbumsController } from './albums.controller'
 import { AlbumsService } from './albums.service'
+import { Test, TestingModule } from '@nestjs/testing'
 
 describe('AlbumsController', () => {
   let controller: AlbumsController

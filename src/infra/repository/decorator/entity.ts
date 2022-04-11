@@ -8,7 +8,7 @@ export function Entity(name: string): ClassDecorator {
     getMetadataArgsStorage().tables.push({
       target: target,
       name: name,
-      repositoryName: target.name + 'Repository'
+      repositoryName: target.name + 'Repository',
     } as TableMetaDataArgs)
   }
 }

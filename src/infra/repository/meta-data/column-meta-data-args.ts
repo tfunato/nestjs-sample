@@ -19,5 +19,4 @@ export interface ColumnMetaDataArgs {
    * Target RepositoryName
    */
   readonly repositoryName: string
-
 }

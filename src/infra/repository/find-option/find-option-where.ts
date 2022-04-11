@@ -1,15 +1,12 @@
-
 /**
  * A single property handler for FindOptionsWere.
  */
 export type FindOptionsWhereProperty<Property> = Property extends Promise<
-    infer I
-    >
+  infer I
+>
   ? FindOptionsWhereProperty<NonNullable<I>>
   : Property extends Array<infer I>
-  ?
-    | FindOptionsWhere<Property>
-    | FindOptionsWhere<Property>[]
+  ? FindOptionsWhere<Property> | FindOptionsWhere<Property>[]
   : Property
 
 /** :

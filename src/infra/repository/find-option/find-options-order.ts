@@ -1,10 +1,9 @@
-
 /**
  * A single property handler for FindOptionsOrder.
  */
 export type FindOptionsOrderProperty<Property> = Property extends Promise<
-    infer I
-    >
+  infer I
+>
   ? FindOptionsOrderProperty<NonNullable<I>>
   : Property extends Array<infer I>
   ? FindOptionsOrderProperty<NonNullable<I>>
@@ -29,13 +28,13 @@ export type FindOptionsOrder<Entity> = {
  * Value of order by in find options.
  */
 export type FindOptionsOrderValue =
-  | "ASC"
-  | "DESC"
-  | "asc"
-  | "desc"
+  | 'ASC'
+  | 'DESC'
+  | 'asc'
+  | 'desc'
   | 1
   | -1
   | {
-  direction?: "asc" | "desc" | "ASC" | "DESC"
-  nulls?: "first" | "last" | "FIRST" | "LAST"
-}
+      direction?: 'asc' | 'desc' | 'ASC' | 'DESC'
+      nulls?: 'first' | 'last' | 'FIRST' | 'LAST'
+    }
