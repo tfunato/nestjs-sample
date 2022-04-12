@@ -35,9 +35,7 @@ export class AlbumsController {
     @Param('id') id: string,
     @Body() updateAlbumDto: UpdateAlbumDto,
   ) {
-    const ret = await this.albumsService.update(+id, updateAlbumDto)
-    console.log(ret)
-    return ret
+    return await this.albumsService.update(+id, updateAlbumDto)
   }
 
   @Delete(':id')

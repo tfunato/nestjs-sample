@@ -9,9 +9,9 @@ import { SingersRepository } from './singers.repository'
 export class SingersService {
   constructor(private readonly singerRepository: SingersRepository) {}
 
-  async create(createSingerDto: CreateSingerDto):Promise<Singer> {
+  async create(createSingerDto: CreateSingerDto): Promise<Singer> {
     const singer = new Singer()
-    singer.singerId = uuidv4()
+    singer.singerId = uuidv4() as string
     singer.lastName = 'singer last name'
     singer.firstName = 'singer first name'
     return await this.singerRepository.insert(singer)
@@ -23,12 +23,14 @@ export class SingersService {
 
   async findOne(singerId: string): Promise<Singer> | null {
     return await this.singerRepository.findOne({
-      where: {singerId: singerId}
-      }
-    )
+      where: { singerId: singerId },
+    })
   }
 
-  async update(singerId: string, updateSingerDto: UpdateSingerDto): Promise<number> {
+  async update(
+    singerId: string,
+    updateSingerDto: UpdateSingerDto,
+  ): Promise<number> {
     const singer = new Singer()
     singer.singerId = singerId
     singer.lastName = 'last name update'
@@ -38,7 +40,7 @@ export class SingersService {
 
   async remove(singerId: string): Promise<number> {
     return await this.singerRepository.deleteByPK({
-      where: {singerId: singerId}
+      where: { singerId: singerId },
     })
   }
 }

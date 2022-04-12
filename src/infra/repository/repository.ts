@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { SpannerService } from '../service/spanner.service'
 import { FindOneOptions } from './find-option/find-one-option'
 import { getMetadataArgsStorage } from './globals'
@@ -5,6 +6,7 @@ import { ColumnMetaDataArgs } from './meta-data/column-meta-data-args'
 import { TableMetaDataArgs } from './meta-data/table-meta-data-args'
 import { Row } from '@google-cloud/spanner/build/src/partial-result-stream'
 import { Logger } from '@nestjs/common'
+import { Database } from '@google-cloud/spanner/build/src/database'
 
 type Meta = {
   metaTable: TableMetaDataArgs
@@ -31,37 +33,35 @@ export class Repository<T> {
     })
 
     const params = {}
-    columnNames.filter((columnName) => {
-      if (entity[columnName] === null) {
+    const filteredColumns = columnNames.filter((columnName) => {
+      const value = entity[columnName]
+      if (value === null || value === undefined) {
         return false
       } else {
-        params[columnName] = entity[columnName]
+        params[columnName] = value
         return true
       }
     })
 
-    query = query.concat(columnNames.join(', ')).concat(' ) VALUES (@')
-    query = query.concat(columnNames.join(', @'))
+    query = query.concat(filteredColumns.join(', ')).concat(' ) VALUES (@')
+    query = query.concat(filteredColumns.join(', @'))
     query = query.concat(')')
     this.logger.log(query)
     this.logger.log(JSON.stringify(params))
 
-    const database = this.spanner.getDb()
-    database.runTransaction(async (err, transaction) => {
-      if (err) {
-        throw err
-      }
-      try {
+    const database: Database = this.spanner.getDb()
+    try {
+      await database.runTransactionAsync(async (transaction) => {
         const [rowCount] = await transaction.runUpdate({
           sql: query,
           params: params,
         })
-        this.logger.log('insert row count:' + rowCount)
+        this.logger.log('insert row count:' + rowCount.toString())
         await transaction.commit()
-      } catch (err) {
-        throw err
-      }
-    })
+      })
+    } catch (err) {
+      throw err
+    }
     return entity
   }
   async findAll(): Promise<T[]> {
@@ -144,11 +144,8 @@ export class Repository<T> {
 
     let count = 0
     const db = await this.spanner.getDb()
-    await db.runTransaction(async (err, transaction) => {
-      if (err) {
-        throw err
-      }
-      try {
+    try {
+      await db.runTransactionAsync(async (transaction) => {
         const [rowCount] = await transaction.runUpdate({
           sql: sql,
           params: params,
@@ -156,13 +153,11 @@ export class Repository<T> {
         this.logger.log(sql)
         this.logger.log('delete row count:' + rowCount)
         await transaction.commit()
-
         count = rowCount
-        return 0
-      } catch (err) {
-        throw err
-      }
-    })
+      })
+    } catch (err) {
+      throw err
+    }
     return count
   }
 
@@ -202,12 +197,9 @@ export class Repository<T> {
     sql = sql.concat(setters.join(' , '))
     sql = sql.concat(' WHERE ').concat(wheres.join(' AND '))
     const db = await this.spanner.getDb()
-    let retCount = 0
-    await db.runTransaction(async (err, transaction) => {
-      if (err) {
-        throw err
-      }
-      try {
+    let count = 0
+    try {
+      await db.runTransactionAsync(async (transaction) => {
         const [rowCount] = await transaction.runUpdate({
           sql: sql,
           params: params,
@@ -216,12 +208,12 @@ export class Repository<T> {
         this.logger.log(JSON.stringify(params))
         this.logger.log('update row count:' + rowCount)
         await transaction.commit()
-        retCount = rowCount
-      } catch (err) {
-        throw err
-      }
-    })
-    return retCount
+        count = rowCount
+      })
+    } catch (err) {
+      throw err
+    }
+    return count
   }
 
   protected getMetaData(): Meta {
