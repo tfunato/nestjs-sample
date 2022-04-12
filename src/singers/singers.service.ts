@@ -1,26 +1,44 @@
 import { Injectable } from '@nestjs/common'
 import { CreateSingerDto } from './dto/create-singer.dto'
 import { UpdateSingerDto } from './dto/update-singer.dto'
+import { Singer } from './entities/singer.entity'
+import { v4 as uuidv4 } from 'uuid'
+import { SingersRepository } from './singers.repository'
 
 @Injectable()
 export class SingersService {
-  create(createSingerDto: CreateSingerDto) {
-    return 'This action adds a new singer'
+  constructor(private readonly singerRepository: SingersRepository) {}
+
+  async create(createSingerDto: CreateSingerDto):Promise<Singer> {
+    const singer = new Singer()
+    singer.singerId = uuidv4()
+    singer.lastName = 'singer last name'
+    singer.firstName = 'singer first name'
+    return await this.singerRepository.insert(singer)
   }
 
-  findAll() {
-    return `This action returns all singers`
+  async findAll(): Promise<Singer[]> {
+    return await this.singerRepository.findAll()
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} singer`
+  async findOne(singerId: string): Promise<Singer> | null {
+    return await this.singerRepository.findOne({
+      where: {singerId: singerId}
+      }
+    )
   }
 
-  update(id: number, updateSingerDto: UpdateSingerDto) {
-    return `This action updates a #${id} singer`
+  async update(singerId: string, updateSingerDto: UpdateSingerDto): Promise<number> {
+    const singer = new Singer()
+    singer.singerId = singerId
+    singer.lastName = 'last name update'
+    singer.firstName = 'first name update'
+    return await this.singerRepository.updateByPK(singer)
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} singer`
+  async remove(singerId: string): Promise<number> {
+    return await this.singerRepository.deleteByPK({
+      where: {singerId: singerId}
+    })
   }
 }

@@ -29,25 +29,33 @@ export class Repository<T> {
     const columnNames: string[] = meta.metaColumns.map((column) => {
       return column.propertyName
     })
+
+    const params = {}
+    columnNames.filter((columnName) => {
+      if (entity[columnName] === null) {
+        return false
+      } else {
+        params[columnName] = entity[columnName]
+        return true
+      }
+    })
+
     query = query.concat(columnNames.join(', ')).concat(' ) VALUES (@')
     query = query.concat(columnNames.join(', @'))
     query = query.concat(')')
+    this.logger.log(query)
+    this.logger.log(JSON.stringify(params))
 
     const database = this.spanner.getDb()
     database.runTransaction(async (err, transaction) => {
       if (err) {
         throw err
       }
-      const param = {}
-      columnNames.forEach((columnName) => {
-        param[columnName] = entity[columnName]
-      })
       try {
         const [rowCount] = await transaction.runUpdate({
           sql: query,
-          params: param,
+          params: params,
         })
-        this.logger.log(query)
         this.logger.log('insert row count:' + rowCount)
         await transaction.commit()
       } catch (err) {
@@ -182,11 +190,11 @@ export class Repository<T> {
     const params = {}
     Object.keys(entity).forEach((key: string) => {
       if (pkColumns.includes(key)) {
-        wheres.push(key + ' = @' + key)
+        wheres.push(key + '=@' + key)
         params[key] = entity[key]
       } else {
         if (entity[key]) {
-          setters.push(key + ' = @' + key)
+          setters.push(key + '=@' + key)
           params[key] = entity[key]
         }
       }

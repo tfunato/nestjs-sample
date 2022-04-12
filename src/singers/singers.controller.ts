@@ -25,18 +25,18 @@ export class SingersController {
     return this.singersService.findAll()
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.singersService.findOne(+id)
+  @Get(':singerId')
+  findOne(@Param('singerId') singerId: string) {
+    return this.singersService.findOne(singerId)
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSingerDto: UpdateSingerDto) {
-    return this.singersService.update(+id, updateSingerDto)
+  @Patch(':singerId')
+  update(@Param('singerId') singerId: string, @Body() updateSingerDto: UpdateSingerDto) {
+    return this.singersService.update(singerId, updateSingerDto)
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.singersService.remove(+id)
+  @Delete(':singerId')
+  remove(@Param('singerId') singerId: string) {
+    return this.singersService.remove(singerId)
   }
 }
