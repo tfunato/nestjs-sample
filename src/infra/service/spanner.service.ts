@@ -16,7 +16,11 @@ export class SpannerService {
     this.logger.log('emulator host:' + process.env.SPANNER_EMULATOR_HOST)
     const spanner = new Spanner({ projectId })
     const instance = spanner.instance(instanceId)
-    this.db = instance.database(databaseId)
+    const poolOption = {
+      acquireTimeout: 2000,
+      fail: true,
+    }
+    this.db = instance.database(databaseId, poolOption)
   }
 
   getDb(): Database {

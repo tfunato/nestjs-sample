@@ -11,9 +11,10 @@ export class SingersService {
 
   async create(createSingerDto: CreateSingerDto): Promise<Singer> {
     const singer = new Singer()
-    singer.singerId = uuidv4() as string
+    singer.singerId = uuidv4()
+    singer.firstName = null
     singer.lastName = 'singer last name'
-    singer.firstName = 'singer first name'
+    singer.singerInfo = null
     return await this.singerRepository.insert(singer)
   }
 

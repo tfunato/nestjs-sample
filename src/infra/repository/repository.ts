@@ -7,6 +7,7 @@ import { TableMetaDataArgs } from './meta-data/table-meta-data-args'
 import { Row } from '@google-cloud/spanner/build/src/partial-result-stream'
 import { Logger } from '@nestjs/common'
 import { Database } from '@google-cloud/spanner/build/src/database'
+import { Transaction } from '@google-cloud/spanner/build/src/transaction'
 
 type Meta = {
   metaTable: TableMetaDataArgs
@@ -27,15 +28,19 @@ export class Repository<T> {
     const meta = this.getMetaData()
     let query = 'INSERT '
     query = query.concat(meta.metaTable.name)
-    query = query.concat('(')
+    query = query.concat(' (')
     const columnNames: string[] = meta.metaColumns.map((column) => {
       return column.propertyName
     })
 
     const params = {}
+    const nullColumns: string[] = []
     const filteredColumns = columnNames.filter((columnName) => {
       const value = entity[columnName]
-      if (value === null || value === undefined) {
+      if (value === undefined) {
+        return false
+      } else if (value === null) {
+        nullColumns.push(columnName)
         return false
       } else {
         params[columnName] = value
@@ -43,9 +48,17 @@ export class Repository<T> {
       }
     })
 
-    query = query.concat(filteredColumns.join(', ')).concat(' ) VALUES (@')
+    query = query.concat(filteredColumns.join(', '))
+    if (nullColumns.length > 0) {
+      query = query.concat(', ').concat(nullColumns.join(', '))
+    }
+    query = query.concat(' ) VALUES (@')
     query = query.concat(filteredColumns.join(', @'))
+    nullColumns.forEach((colum) => {
+      query = query.concat(', NULL')
+    })
     query = query.concat(')')
+
     this.logger.log(query)
     this.logger.log(JSON.stringify(params))
 
@@ -100,7 +113,6 @@ export class Repository<T> {
         sql: sql,
         params: params,
       })
-      this.logger.log(rows)
       const entities: T[] = rows.map<T>((row: Row) => {
         return this.mapEntity(row, columnNames)
       })
