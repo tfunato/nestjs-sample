@@ -4,9 +4,10 @@ module.exports = {
     project: 'tsconfig.json',
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint/eslint-plugin'],
+  plugins: ['@typescript-eslint/eslint-plugin', 'unused-imports'],
   extends: [
     'plugin:@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:prettier/recommended',
   ],
   root: true,
@@ -19,6 +20,13 @@ module.exports = {
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-explicit-any': 'error',
+    semi: ['error', 'never', { beforeStatementContinuationChars: 'never' }],
+    'semi-spacing': ['error', { after: true, before: false }],
+    'semi-style': ['error', 'first'],
+    'no-extra-semi': 'error',
+    'no-unexpected-multiline': 'error',
+    'no-unreachable': 'error',
+    'unused-imports/no-unused-imports-ts': 'error',
   },
-};
+}
