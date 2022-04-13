@@ -21,9 +21,10 @@
     "test:e2e": "jest --config test/jest-e2e.json"
   },
   "dependencies": {
-    "@google-cloud/spanner": "^5.17.0",
+    "@google-cloud/spanner": "^5.18.0",
     "@nestjs/common": "^8.0.0",
     "@nestjs/core": "^8.0.0",
+    "@types/uuid": "^8.3.4",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^8.0.0",
     "reflect-metadata": "^0.1.13",
