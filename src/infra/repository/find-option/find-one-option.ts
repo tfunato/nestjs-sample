@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { FindOptionsWhere } from './find-option-where'
 import { FindOptionsOrder } from './find-options-order'
 

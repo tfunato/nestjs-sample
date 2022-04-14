@@ -31,7 +31,10 @@ export class SingersController {
   }
 
   @Patch(':singerId')
-  update(@Param('singerId') singerId: string, @Body() updateSingerDto: UpdateSingerDto) {
+  update(
+    @Param('singerId') singerId: string,
+    @Body() updateSingerDto: UpdateSingerDto,
+  ) {
     return this.singersService.update(singerId, updateSingerDto)
   }
 
