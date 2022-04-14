@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { getMetadataArgsStorage } from '../globals'
 import { TableMetaDataArgs } from '../meta-data/table-meta-data-args'
 

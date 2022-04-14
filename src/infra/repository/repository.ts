@@ -7,7 +7,6 @@ import { TableMetaDataArgs } from './meta-data/table-meta-data-args'
 import { Row } from '@google-cloud/spanner/build/src/partial-result-stream'
 import { Logger } from '@nestjs/common'
 import { Database } from '@google-cloud/spanner/build/src/database'
-import { Transaction } from '@google-cloud/spanner/build/src/transaction'
 
 type Meta = {
   metaTable: TableMetaDataArgs

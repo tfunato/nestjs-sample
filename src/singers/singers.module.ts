@@ -11,11 +11,13 @@ import { ServiceModule } from '../infra/service/service.module'
   controllers: [SingersController],
   providers: [
     SingersService,
-    {provide: SingersRepository,
-    useFactory: (spanner: SpannerService) => {
-      return new SingersRepository(spanner, Singer)
+    {
+      provide: SingersRepository,
+      useFactory: (spanner: SpannerService) => {
+        return new SingersRepository(spanner, Singer)
+      },
+      inject: [SpannerService],
     },
-    inject: [SpannerService]}
   ],
 })
 export class SingersModule {}
